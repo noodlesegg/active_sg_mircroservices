@@ -1,0 +1,7 @@
+{
+  "name": "pdf_generator",
+  "version": "1.0.0",
+  "dependencies": {
+    "html-pdf": "^2.1.0"
+  }
+}
