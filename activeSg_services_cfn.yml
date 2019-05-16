@@ -1,0 +1,160 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "ActiveSG Micro Services"
+
+Parameters:
+  S3PDFBucketName:
+    Type: String
+    Description: "S3 Bucket name for the generated PDF."
+
+  AndroidSNSArn:
+    Type: String
+    Description: "SNS Amazon Resource Name for android application"
+
+  iOSSNSArn:
+    Type: String
+    Description: "SNS Amazon Resource Name for iOS application"
+
+Resources:
+  S3PDF:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub "${S3PDFBucketName}-${AWS::Region}"
+      AccessControl: "Private"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: "AES256"
+
+  LambdaServiceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "lambda-cloudwatch-logs"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+        - PolicyName: "lambda-lambda-s3-ses"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: 
+                  - "lambda:InvokeFunction"
+                  - "s3:GetObject"
+                  - "s3:PutObject"
+                  - "ses:SendEmail"
+                  - "ses:SendRawEmail"
+                Resource: "*"
+        - PolicyName: "sqs-lambda"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "sqs:SendMessage"
+                  - "sqs:ReceiveMessage"
+                  - "sqs:DeleteMessage"
+                  - "sqs:GetQueueAttributes"
+                  - "sqs:ListQueues"
+                Resource: "*"
+        - PolicyName: "lambda-sns"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "sns:CreatePlatformEndpoint"
+                  - "sns:Publish"
+                Resource: "*"
+
+  LambdaGeneratePDF:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code:
+        S3Bucket: active-sg-services-deployment-package
+        S3Key: html_to_pdf.zip
+      Description: "PDF generator"
+      FunctionName: pdfGenerator
+      Handler: pdf.generate
+      Role: !GetAtt LambdaServiceRole.Arn
+      Runtime: nodejs8.10
+      Timeout: 60
+      Environment:
+        Variables:
+          pdfBucket: !Sub "${S3PDFBucketName}-${AWS::Region}"
+          sendMailFunction: !Sub "${LambdaPDFNotificationEmail}"
+          region: !Sub "${AWS::Region}"
+
+  LambdaPDFNotificationEmail:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code:
+        S3Bucket: active-sg-services-deployment-package
+        S3Key: html_pdf_notification.zip
+      Description: "PDF generator email notification"
+      FunctionName: pdfEmailNotification
+      Handler: email.send
+      Role: !GetAtt LambdaServiceRole.Arn
+      Runtime: nodejs8.10
+      Environment:
+        Variables:
+          pdfBucket: !Sub "${S3PDFBucketName}-${AWS::Region}"
+
+  LambdaActiveSGNotification:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code:
+        S3Bucket: active-sg-services-deployment-package
+        S3Key: active_sg_notification.zip
+      Description: "ActiveSG Notification"
+      FunctionName: activeSGNotification
+      Handler: process.queue
+      Role: !GetAtt LambdaServiceRole.Arn
+      Runtime: nodejs8.10
+      Timeout: 60
+      Environment:
+        Variables:
+          successfulQueueUrl: !Ref SQSSuccessfulQueue
+          toProcessQueueUrl: !Ref SQSToBeProcessQueue
+          messageBirdAccessKey: "mkrBX17v7FQtuv0BiQHK5q7Du"
+          GCM: !Sub "${AndroidSNSArn}"
+          APNS: !Sub "${iOSSNSArn}" 
+
+  SQSToBeProcessQueue:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: active-sg-notification
+      ReceiveMessageWaitTimeSeconds: 20
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt SQSDeadLetterQueue.Arn
+        maxReceiveCount: 5
+
+  SQSSuccessfulQueue:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: active-sg-notification-successful
+      ReceiveMessageWaitTimeSeconds: 20
+
+  SQSDeadLetterQueue:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: active-sg-notification-DLQ
+
+  LambdaEventSource:
+    Type: "AWS::Lambda::EventSourceMapping"
+    Properties:
+      EventSourceArn: !GetAtt SQSToBeProcessQueue.Arn
+      FunctionName: !GetAtt LambdaActiveSGNotification.Arn
