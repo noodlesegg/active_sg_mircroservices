@@ -49,15 +49,14 @@ module.exports = function(queueMessageBody) {
 						PlatformApplicationArn: process.env.APNS,
 						Token: token
 					};
-					let aps = {
-						"aps": {
-							"alert": notificationText,
-							"badge": 1,
-							"sound": "default"
-						}
-					}
 					let payload = {
-						"APNS": JSON.stringify(aps)
+						"APNS": {
+							aps: {
+								alert: notificationText,
+								badge: 1,
+								sound: "default"
+							}
+						}
 					};
 					console.log(`creating ios platform endpoint ${JSON.stringify(params)}`);
 					createPlatformEndpoint(params, payload);
@@ -68,15 +67,13 @@ module.exports = function(queueMessageBody) {
 						PlatformApplicationArn: process.env.GCM,
 						Token: token
 					};
-					let GCM = {
-						"data" : {
-							"message" : notificationText
+					let payload = {
+						"GCM": {
+							notification: {
+								text: notificationText
+							}
 						}
 					}
-					let payload = {
-						"default": "test",
-						"GCM": JSON.stringify(GCM)
-					};
 					console.log(`creating android platform endpoint ${JSON.stringify(params)}`);
 					createPlatformEndpoint(params, payload);
 				}
