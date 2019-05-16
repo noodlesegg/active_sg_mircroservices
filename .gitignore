@@ -1,7 +1,3 @@
 .DS_Store
-active_sg_notification/node_modules
-pdf_generator/node_modules
-pdf_notification/node_modules
-active_sg_notification/.zip
-pdf_generator/.zip
-pdf_notification/.zip
+*/node_modules
+*/.zip
