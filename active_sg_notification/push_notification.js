@@ -50,13 +50,13 @@ module.exports = function(queueMessageBody) {
 						Token: token
 					};
 					let payload = {
-						"APNS": {
+						"APNS": JSON.stringify({
 							aps: {
 								alert: notificationText,
 								badge: 1,
 								sound: "default"
 							}
-						}
+						})
 					};
 					console.log(`creating ios platform endpoint ${JSON.stringify(params)}`);
 					createPlatformEndpoint(params, payload);
@@ -68,11 +68,11 @@ module.exports = function(queueMessageBody) {
 						Token: token
 					};
 					let payload = {
-						"GCM": {
+						"GCM": JSON.stringify({
 							notification: {
 								text: notificationText
 							}
-						}
+						})
 					}
 					console.log(`creating android platform endpoint ${JSON.stringify(params)}`);
 					createPlatformEndpoint(params, payload);
