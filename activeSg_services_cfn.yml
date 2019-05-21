@@ -36,7 +36,7 @@ Resources:
               Service: lambda.amazonaws.com
             Action: "sts:AssumeRole"
       Policies:
-        - PolicyName: "lambda-cloudwatch-logs"
+        - PolicyName: "cloudwatch-logs"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -46,7 +46,7 @@ Resources:
                   - "logs:CreateLogStream"
                   - "logs:PutLogEvents"
                 Resource: "*"
-        - PolicyName: "lambda-lambda-s3-ses"
+        - PolicyName: "lambda-s3-ses"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -57,8 +57,10 @@ Resources:
                   - "s3:PutObject"
                   - "ses:SendEmail"
                   - "ses:SendRawEmail"
-                Resource: "*"
-        - PolicyName: "sqs-lambda"
+                Resource: 
+                  - !Sub "arn:aws:lambda:${AWS::Region}:*"
+                  - !GetAtt S3PDF.Arn
+        - PolicyName: "sqs"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -69,8 +71,10 @@ Resources:
                   - "sqs:DeleteMessage"
                   - "sqs:GetQueueAttributes"
                   - "sqs:ListQueues"
-                Resource: "*"
-        - PolicyName: "lambda-sns"
+                Resource: 
+                  - !GetAtt SQSToBeProcessQueue.Arn
+                  - !GetAtt SQSSuccessfulQueue.Arn
+        - PolicyName: "sns"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -78,7 +82,9 @@ Resources:
                 Action:
                   - "sns:CreatePlatformEndpoint"
                   - "sns:Publish"
-                Resource: "*"
+                Resource: 
+                  - !Sub "${AndroidSNSArn}"
+                  - !Sub "${iOSSNSArn}"
 
   LambdaGeneratePDF:
     Type: "AWS::Lambda::Function"
