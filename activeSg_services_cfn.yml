@@ -91,7 +91,7 @@ Resources:
     Properties:
       Code:
         S3Bucket: active-sg-services-deployment-package
-        S3Key: html_to_pdf.zip
+        S3Key: html_pdf_generator.zip
       Description: "PDF generator"
       FunctionName: pdfGenerator
       Handler: pdf.generate
