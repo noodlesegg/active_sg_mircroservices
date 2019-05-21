@@ -57,9 +57,7 @@ Resources:
                   - "s3:PutObject"
                   - "ses:SendEmail"
                   - "ses:SendRawEmail"
-                Resource: 
-                  - !Sub "arn:aws:lambda:${AWS::Region}:*"
-                  - !GetAtt S3PDF.Arn
+                Resource: "*"
         - PolicyName: "sqs"
           PolicyDocument:
             Version: "2012-10-17"
@@ -71,9 +69,7 @@ Resources:
                   - "sqs:DeleteMessage"
                   - "sqs:GetQueueAttributes"
                   - "sqs:ListQueues"
-                Resource: 
-                  - !GetAtt SQSToBeProcessQueue.Arn
-                  - !GetAtt SQSSuccessfulQueue.Arn
+                Resource: "*"
         - PolicyName: "sns"
           PolicyDocument:
             Version: "2012-10-17"
@@ -82,9 +78,7 @@ Resources:
                 Action:
                   - "sns:CreatePlatformEndpoint"
                   - "sns:Publish"
-                Resource: 
-                  - !Sub "${AndroidSNSArn}"
-                  - !Sub "${iOSSNSArn}"
+                Resource: "*"
 
   LambdaGeneratePDF:
     Type: "AWS::Lambda::Function"
