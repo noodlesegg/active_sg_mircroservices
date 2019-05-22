@@ -39,7 +39,8 @@ function convertToPdf() {
     console.log(`converting html to pdf`);
     let options = {
         width: '1024px',
-        height: '1080px',
+        height: '1500px',
+        format: 'A4',
         orientation: "portrait"
     }
     console.log(`creating ${pdfFileName}`);
