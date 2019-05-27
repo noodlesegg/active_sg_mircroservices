@@ -40,13 +40,14 @@ Resources:
     Properties:
       Artifacts:
         Type: CODEPIPELINE
-        Description: "Code Build for ActiveSG Micro services"
-        Environment:
-          ComputeType: BUILD_GENERAL1_SMALL
-          Type: LINUX_CONTAINER
-        ServiceRole: !GetAtt CodePipelineServiceRole.Arn
-        Source:
-          Type: GITHUB
+      Description: "Code Build for ActiveSG Micro services"
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+        Image: "aws/codebuild/standard:2.0"
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Source:
+        Type: CODEPIPELINE
 
   CodeDeployServerless:
     Type: "AWS::CodeDeploy::Application"
@@ -56,7 +57,11 @@ Resources:
   CodeDeployDeploymentGroup:
     Type: "AWS::CodeDeploy::DeploymentGroup"
     Properties:
-      ApplicationName: "ActiveSG Micro Services"
+      ApplicationName: !Ref CodeDeployServerless
+      DeploymentStyle:
+        DeploymentOption: WITH_TRAFFIC_CONTROL
+        DeploymentType: BLUE_GREEN
+      ServiceRoleArn: !GetAtt CodeDeployServiceRole.Arn
 
   WebHook:
     Type: "AWS::CodePipeline::Webhook"
@@ -66,32 +71,31 @@ Resources:
         SecretToken: !Ref GitHubOAuthToken
       Filters:
         - JsonPath: "$.ref"
-          MatchEquals: "refs/heads/{Branch}
-
-          "
+          MatchEquals: "refs/heads/{Branch}"
       Name: "ActiveSGServicesCodePipelineWebHook"
       TargetAction: "GitHubSourceAction"
       TargetPipeline: !Ref ActiveSGServicesCodePipeline
-      TargetPipelineVersion: !GetAtt ActiveSGServicesCodePipeline.Arn
+      TargetPipelineVersion: 1
 
   ActiveSGServicesCodePipeline:
     Type: "AWS::CodePipeline::Pipeline"
     Properties: 
       ArtifactStore: 
-        Location: !Sub "${S3ArtifactStoreBucket}-${AWS::Region}"
-      Name: "ActiveSG Micro Services"
+        Location: !Ref S3ArtifactStoreBucket
+        Type: "S3"
+      Name: "ActiveSG-Micro-Services"
       RoleArn: !GetAtt CodePipelineServiceRole.Arn
       Stages: 
-        - Name: "GitHub Source"
+        - Name: "GitHub-Source"
           Actions:
-            - Name: "GitHubSourceAction"
+            - Name: "GitHub-Source-Action"
               ActionTypeId:
                 Category: "Source"
                 Owner: "ThirdParty"
                 Version: 1
                 Provider: "GitHub"
               OutputArtifacts:
-                - Name: "ActiveSGMicroServices"
+                - Name: "ActiveSG-Micro-Services"
               Configuration:
                 Owner: !Ref GitHubUserName
                 Repo: !Ref GitHubRepository
@@ -100,21 +104,21 @@ Resources:
                 PollForSourceChanges: false
         - Name: "Build"
           Actions:
-            - Name: "Build"
+            - Name: "Build-Action"
               ActionTypeId:
                 Category: "Build"
                 Owner: "AWS"
                 Version: 1
                 Provider: "CodeBuild"
-              OutputArtifacts:
-                - Name: "ActiveSGMicroServices"
+              InputArtifacts:
+                - Name: "ActiveSG-Micro-Services"
               Configuration:
                 ProjectName: !Ref CodeBuildLambda
         - Name: "Deploy"
           Actions:
-            - Name: "Deploy Action"
+            - Name: "Deploy-Action"
               InputArtifacts:
-                - Name: "ActiveSGMicroServices"
+                - Name: "ActiveSG-Micro-Services"
               ActionTypeId:
                 Category: "Deploy"
                 Owner: "AWS"
@@ -123,6 +127,57 @@ Resources:
               Configuration:
                 ApplicationName: !Ref CodeDeployServerless
                 DeploymentGroupName: !Ref CodeDeployDeploymentGroup
+
+  CodeBuildServiceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "codebuild.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "cloudwatch"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: 
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+        - PolicyName: "s3"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "s3:GetObject"
+                  - "s3:GetObjectVersion"
+                  - "s3:PutObject"
+                Resource: "*"
+
+  CodeDeployServiceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "codedeploy.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "code-deploy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "codedeploy:*"
+                Resource: "*"
 
   CodePipelineServiceRole:
     Type: "AWS::IAM::Role"
@@ -134,7 +189,7 @@ Resources:
             Principal:
               Service: codepipeline.amazonaws.com
             Action: "sts:AssumeRole"
-       Policies:
+      Policies:
         - PolicyName: "cloudformation"
           PolicyDocument:
             Version: "2012-10-17"
@@ -149,15 +204,4 @@ Resources:
               - Effect: "Allow"
                 Action: "codebuild:*"
                 Resource: "*"
-        - PolicyName: "code-deploy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action:
-                  - "codedeploy:CreateDeployment"
-                  - "codedeploy:GetApplicationRevision"
-                  - "codedeploy:GetDeployment"
-                  - "codedeploy:GetDeploymentConfig"
-                  - "codedeploy:RegisterApplicationRevision"
-                Resource: "*"
+
