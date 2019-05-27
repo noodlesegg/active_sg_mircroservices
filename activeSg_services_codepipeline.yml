@@ -1,0 +1,163 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "ActiveSG Micro Services Code Pipeline"
+
+Parameters:
+  GitHubUserName:
+    Type: String
+    Description: "GitHub username for the repository"
+
+  GitHubRepository:
+    Type: String
+    Description: "GitHub repository"
+
+  GitHubBranch:
+    Type: String
+    Description: "GitHub Branch"
+    Default: master
+
+  GitHubOAuthToken:
+    Type: String
+    Description: "GitHub Token"
+    NoEcho: true
+
+  S3ArtifactStoreBucketName:
+    Type: String
+    Description: "S3 bucket for the artifact store"
+
+Resources:
+  S3ArtifactStoreBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub "${S3ArtifactStoreBucketName}-${AWS::Region}"
+      AccessControl: "Private"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: "AES256"
+
+  CodeBuildLambda:
+    Type: "AWS::CodeBuild::Project"
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+        Description: "Code Build for ActiveSG Micro services"
+        Environment:
+          ComputeType: BUILD_GENERAL1_SMALL
+          Type: LINUX_CONTAINER
+        ServiceRole: !GetAtt CodePipelineServiceRole.Arn
+        Source:
+          Type: GITHUB
+
+  CodeDeployServerless:
+    Type: "AWS::CodeDeploy::Application"
+    Properties:
+      ComputePlatform: Lambda
+
+  CodeDeployDeploymentGroup:
+    Type: "AWS::CodeDeploy::DeploymentGroup"
+    Properties:
+      ApplicationName: "ActiveSG Micro Services"
+
+  WebHook:
+    Type: "AWS::CodePipeline::Webhook"
+    Properties:
+      Authentication: GITHUB_HMAC
+      AuthenticationConfiguration:
+        SecretToken: !Ref GitHubOAuthToken
+      Filters:
+        - JsonPath: "$.ref"
+          MatchEquals: "refs/heads/{Branch}
+
+          "
+      Name: "ActiveSGServicesCodePipelineWebHook"
+      TargetAction: "GitHubSourceAction"
+      TargetPipeline: !Ref ActiveSGServicesCodePipeline
+      TargetPipelineVersion: !GetAtt ActiveSGServicesCodePipeline.Arn
+
+  ActiveSGServicesCodePipeline:
+    Type: "AWS::CodePipeline::Pipeline"
+    Properties: 
+      ArtifactStore: 
+        Location: !Sub "${S3ArtifactStoreBucket}-${AWS::Region}"
+      Name: "ActiveSG Micro Services"
+      RoleArn: !GetAtt CodePipelineServiceRole.Arn
+      Stages: 
+        - Name: "GitHub Source"
+          Actions:
+            - Name: "GitHubSourceAction"
+              ActionTypeId:
+                Category: "Source"
+                Owner: "ThirdParty"
+                Version: 1
+                Provider: "GitHub"
+              OutputArtifacts:
+                - Name: "ActiveSGMicroServices"
+              Configuration:
+                Owner: !Ref GitHubUserName
+                Repo: !Ref GitHubRepository
+                Branch: !Ref GitHubBranch
+                OAuthToken: !Ref GitHubOAuthToken
+                PollForSourceChanges: false
+        - Name: "Build"
+          Actions:
+            - Name: "Build"
+              ActionTypeId:
+                Category: "Build"
+                Owner: "AWS"
+                Version: 1
+                Provider: "CodeBuild"
+              OutputArtifacts:
+                - Name: "ActiveSGMicroServices"
+              Configuration:
+                ProjectName: !Ref CodeBuildLambda
+        - Name: "Deploy"
+          Actions:
+            - Name: "Deploy Action"
+              InputArtifacts:
+                - Name: "ActiveSGMicroServices"
+              ActionTypeId:
+                Category: "Deploy"
+                Owner: "AWS"
+                Version: 1
+                Provider: "CodeDeploy"
+              Configuration:
+                ApplicationName: !Ref CodeDeployServerless
+                DeploymentGroupName: !Ref CodeDeployDeploymentGroup
+
+  CodePipelineServiceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: codepipeline.amazonaws.com
+            Action: "sts:AssumeRole"
+       Policies:
+        - PolicyName: "cloudformation"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "cloudformation:*"
+                Resource: "*"
+        - PolicyName: "codeBuild"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "codebuild:*"
+                Resource: "*"
+        - PolicyName: "code-deploy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "codedeploy:CreateDeployment"
+                  - "codedeploy:GetApplicationRevision"
+                  - "codedeploy:GetDeployment"
+                  - "codedeploy:GetDeploymentConfig"
+                  - "codedeploy:RegisterApplicationRevision"
+                Resource: "*"
