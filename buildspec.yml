@@ -13,7 +13,7 @@ phases:
 artifacts:
   type: zip
   files:
-    - active_sg_notification/node_modules/nodemailer/*
-    - pdf_generator/node_modules/html-pdf/*
-    - pdf_notification/node_modules/nodemailer/*
+    - active_sg_notification/*
+    - pdf_generator/*
+    - pdf_notification/*
     - activeSg_sam_output.yml
