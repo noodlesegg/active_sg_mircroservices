@@ -123,7 +123,7 @@ Resources:
                 Category: "Deploy"
                 Owner: "AWS"
                 Version: 1
-                Provider: "CodeDeploy"
+                Provider: "AWS CloudFormation"
               Configuration:
                 ApplicationName: !Ref CodeDeployServerless
                 DeploymentGroupName: !Ref CodeDeployDeploymentGroup
