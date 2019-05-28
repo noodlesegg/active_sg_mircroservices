@@ -3,11 +3,12 @@ phases:
   
   install:
     runtime-versions:
-      nodejs: 10
+      nodejs: 8.10
     commands:
+      - echo installing dependency.........
       - cd active_sg_notification && npm install
-      - cd pdf_generator && npm install
-      - cd pdf_notification && npm install
+      - cd ../pdf_generator && npm install
+      - cd ../pdf_notification && npm install
 
   build:
     commands:
