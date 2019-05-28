@@ -73,7 +73,7 @@ Resources:
         - JsonPath: "$.ref"
           MatchEquals: "refs/heads/{Branch}"
       Name: "ActiveSGServicesCodePipelineWebHook"
-      TargetAction: "GitHubSourceAction"
+      TargetAction: "GitHub-Source-Action"
       TargetPipeline: !Ref ActiveSGServicesCodePipeline
       TargetPipelineVersion: 1
 
@@ -203,5 +203,14 @@ Resources:
             Statement:
               - Effect: "Allow"
                 Action: "codebuild:*"
+                Resource: "*"
+        - PolicyName: "s3"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: 
+                  - "s3:GetObject"
+                  - "s3:PutObject"
                 Resource: "*"
 
