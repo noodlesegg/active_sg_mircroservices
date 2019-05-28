@@ -45,6 +45,9 @@ Resources:
         ComputeType: BUILD_GENERAL1_SMALL
         Type: LINUX_CONTAINER
         Image: "aws/codebuild/standard:2.0"
+        EnvironmentVariables:
+          - Name: ARTIFACT_BUCKET
+            Value: !Ref S3ArtifactStoreBucket
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
       Source:
         Type: CODEPIPELINE
