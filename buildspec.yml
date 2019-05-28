@@ -3,7 +3,7 @@ phases:
   
   install:
     runtime-versions:
-      nodejs: 8.10
+      nodejs: 8
     commands:
       - echo installing dependency.........
       - cd active_sg_notification && npm install
