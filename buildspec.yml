@@ -1,16 +1,11 @@
 version: 0.2
 phases:
-  
-  install:
-    runtime-versions:
-      nodejs: 2.4.7
+
+  build:
     commands:
       - cd active_sg_notification && npm install
       - cd pdf_generator && npm install
       - cd pdf_notification && npm install
-
-  build:
-    commands:
       - aws cloudformation package --template-file activeSg_sam.yaml --s3-bucket $BUCKET --output-template-file activeSg_sam_output.yaml --debug
 
 artifacts:
