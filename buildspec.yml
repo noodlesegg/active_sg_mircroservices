@@ -9,6 +9,7 @@ phases:
       - cd active_sg_notification && npm install
       - cd ../pdf_generator && npm install
       - cd ../pdf_notification && npm install
+      - cd ../
       - aws cloudformation package --template-file activeSg_sam.yml --s3-bucket ${ARTIFACT_BUCKET} --output-template-file activeSg_sam_output.yml --debug
 
 artifacts:
