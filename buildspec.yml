@@ -20,4 +20,5 @@ artifacts:
     - active_sg_notification/*
     - pdf_generator/*
     - pdf_notification/*
+    - activeSg_sam.yml
     - activeSg_sam_output.yml
