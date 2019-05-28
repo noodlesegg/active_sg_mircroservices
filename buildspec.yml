@@ -3,7 +3,7 @@ phases:
   
   install:
     runtime-versions:
-      Node.js: 2.4.7
+      nodejs: 2.4.7
     commands:
       - cd active_sg_notification && npm install
       - cd pdf_generator && npm install
