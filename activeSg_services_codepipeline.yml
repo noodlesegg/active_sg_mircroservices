@@ -104,7 +104,7 @@ Resources:
                 Repo: !Ref GitHubRepository
                 Branch: !Ref GitHubBranch
                 OAuthToken: !Ref GitHubOAuthToken
-                PollForSourceChanges: false
+                # PollForSourceChanges: false
         - Name: "Build"
           Actions:
             - Name: "Build-Action"

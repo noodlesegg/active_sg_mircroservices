@@ -12,7 +12,7 @@ phases:
 
   build:
     commands:
-      - aws cloudformation package --template-file activeSg_sam.yml --s3-bucket ${ARTIFACT_BUCKET} --output-template-file activeSg_sam_output.yml --debug
+      - aws cloudformation package --template-file ./activeSg_sam.yml --s3-bucket ${ARTIFACT_BUCKET} --output-template-file activeSg_sam_output.yml --debug
 
 artifacts:
   type: zip
