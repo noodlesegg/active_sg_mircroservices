@@ -48,29 +48,25 @@ Resources:
         EnvironmentVariables:
           - Name: ARTIFACT_BUCKET
             Value: !Ref S3ArtifactStoreBucket
-          - Name: APPLICATION_NAME
-            Value: !Ref CodeDeployServerless
-          - Name: DEPLOYMENT_GROUP_NAME
-            Value: !Ref CodeDeployDeploymentGroup
 
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
       Source:
         Type: CODEPIPELINE
 
-  CodeDeployServerless:
-    Type: "AWS::CodeDeploy::Application"
-    Properties:
-      ComputePlatform: Lambda
+  #CodeDeployServerless:
+  #  Type: "AWS::CodeDeploy::Application"
+  #  Properties:
+  #    ComputePlatform: Lambda
 
-  CodeDeployDeploymentGroup:
-    Type: "AWS::CodeDeploy::DeploymentGroup"
-    Properties:
-      ApplicationName: !Ref CodeDeployServerless
-      DeploymentConfigName: CodeDeployDefault.LambdaCanary10Percent5Minutes
-      DeploymentStyle:
-        DeploymentOption: WITH_TRAFFIC_CONTROL
-        DeploymentType: BLUE_GREEN
-      ServiceRoleArn: !GetAtt CodeDeployServiceRole.Arn
+  #CodeDeployDeploymentGroup:
+  #  Type: "AWS::CodeDeploy::DeploymentGroup"
+  #  Properties:
+  #    ApplicationName: !Ref CodeDeployServerless
+  #    DeploymentConfigName: CodeDeployDefault.LambdaCanary10Percent5Minutes
+  #    DeploymentStyle:
+  #      DeploymentOption: WITH_TRAFFIC_CONTROL
+  #      DeploymentType: BLUE_GREEN
+  #    ServiceRoleArn: !GetAtt CodeDeployServiceRole.Arn
 
   WebHook:
     Type: "AWS::CodePipeline::Webhook"
@@ -132,10 +128,13 @@ Resources:
                 Category: "Deploy"
                 Owner: "AWS"
                 Version: 1
-                Provider: "CodeDeploy"
+                Provider: "CloudFormation"
               Configuration:
-                ApplicationName: !Ref CodeDeployServerless
-                DeploymentGroupName: !Ref CodeDeployDeploymentGroup
+                StackName: "active-sg-micro-services-deployment"
+                Capabilities: CAPABILITY_IAM
+                ActionMode: CREATE_UPDATE
+                RoleArn: !GetAtt CodeBuildServiceRole.Arn
+                TemplatePath: ActiveSG-Micro-Services::activeSg_sam_output.yaml
 
   CodeBuildServiceRole:
     Type: "AWS::IAM::Role"
