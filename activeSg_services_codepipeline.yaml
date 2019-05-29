@@ -48,6 +48,11 @@ Resources:
         EnvironmentVariables:
           - Name: ARTIFACT_BUCKET
             Value: !Ref S3ArtifactStoreBucket
+          - Name: APPLICATION_NAME
+            Value: !Ref CodeDeployServerless
+          - Name: DEPLOYMENT_GROUP_NAME
+            Value: !Ref CodeDeployDeploymentGroup
+
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
       Source:
         Type: CODEPIPELINE
