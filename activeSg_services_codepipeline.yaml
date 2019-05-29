@@ -39,7 +39,8 @@ Resources:
     Type: "AWS::CodeBuild::Project"
     Properties:
       Artifacts:
-        Type: CODEPIPELINE
+        Type: "S3"
+        Location: !Ref S3ArtifactStoreBucket
       Description: "Code Build for ActiveSG Micro services"
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
@@ -134,7 +135,7 @@ Resources:
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_IAM
                 RoleArn: !GetAtt CodeDeployServiceRole.Arn
-                TemplatePath: ActiveSG::activeSg_sam_output.yaml
+                TemplatePath: "ActiveSG::activeSg_sam_output.yaml"
 
   CodeBuildServiceRole:
     Type: "AWS::IAM::Role"
@@ -167,13 +168,6 @@ Resources:
                   - "s3:GetObjectVersion"
                   - "s3:PutObject"
                 Resource: "*"
-        - PolicyName: "cloudformation"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action: "cloudformation:*"
-                Resource: "*"
 
   CodeDeployServiceRole:
     Type: "AWS::IAM::Role"
@@ -202,6 +196,13 @@ Resources:
             Statement:
               - Effect: "Allow"
                 Action: "codedeploy:*"
+                Resource: "*"
+        - PolicyName: "cloudformation"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "cloudformation:*"
                 Resource: "*"
 
   CodePipelineServiceRole:
