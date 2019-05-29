@@ -100,7 +100,7 @@ Resources:
                 Version: 1
                 Provider: "GitHub"
               OutputArtifacts:
-                - Name: "ActiveSG-Micro-Services"
+                - Name: "ActiveSG"
               Configuration:
                 Owner: !Ref GitHubUserName
                 Repo: !Ref GitHubRepository
@@ -116,14 +116,14 @@ Resources:
                 Version: 1
                 Provider: "CodeBuild"
               InputArtifacts:
-                - Name: "ActiveSG-Micro-Services"
+                - Name: "ActiveSG"
               Configuration:
                 ProjectName: !Ref CodeBuildLambda
         - Name: "Deploy"
           Actions:
             - Name: "Deploy-Action"
               InputArtifacts:
-                - Name: "ActiveSG-Micro-Services"
+                - Name: "ActiveSG"
               ActionTypeId:
                 Category: "Deploy"
                 Owner: "AWS"
@@ -131,10 +131,10 @@ Resources:
                 Provider: "CloudFormation"
               Configuration:
                 StackName: "active-sg-micro-services-deployment"
-                Capabilities: CAPABILITY_IAM
                 ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_IAM
                 RoleArn: !GetAtt CodeBuildServiceRole.Arn
-                TemplatePath: ActiveSG-Micro-Services::activeSg_sam_output.yaml
+                TemplatePath: ActiveSG::activeSg_sam_output.yaml
 
   CodeBuildServiceRole:
     Type: "AWS::IAM::Role"
