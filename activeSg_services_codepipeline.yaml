@@ -88,7 +88,7 @@ Resources:
       ArtifactStore: 
         Location: !Ref S3ArtifactStoreBucket
         Type: "S3"
-      Name: "ActiveSG-Micro-Services"
+      Name: "ActiveSG"
       RoleArn: !GetAtt CodePipelineServiceRole.Arn
       Stages: 
         - Name: "GitHub-Source"
@@ -133,7 +133,7 @@ Resources:
                 StackName: "active-sg-micro-services-deployment"
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_IAM
-                RoleArn: !GetAtt CodeBuildServiceRole.Arn
+                RoleArn: !GetAtt CodeDeployServiceRole.Arn
                 TemplatePath: ActiveSG::activeSg_sam_output.yaml
 
   CodeBuildServiceRole:
@@ -179,6 +179,16 @@ Resources:
               Service: "codedeploy.amazonaws.com"
             Action: "sts:AssumeRole"
       Policies:
+        - PolicyName: "cloudwatch"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: 
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
         - PolicyName: "code-deploy"
           PolicyDocument:
             Version: "2012-10-17"
