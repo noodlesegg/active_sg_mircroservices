@@ -30,10 +30,10 @@ Resources:
     Properties:
       BucketName: !Sub "${S3ArtifactStoreBucketName}-${AWS::Region}"
       AccessControl: "Private"
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: "AES256"
+      #BucketEncryption:
+      #  ServerSideEncryptionConfiguration:
+      #    - ServerSideEncryptionByDefault:
+      #        SSEAlgorithm: "AES256"
 
   CodeBuildLambda:
     Type: "AWS::CodeBuild::Project"
