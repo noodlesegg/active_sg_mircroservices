@@ -117,10 +117,9 @@ Resources:
                 Version: 1
                 Provider: "CloudFormation"
               Configuration:
-                StackName: "active-sg-micro-services-deployment"
-                ActionMode: CREATE_UPDATE
+                StackName: !Sub "active-sg-micro-services-deployment-${AWS::Region}"
+                ActionMode: REPLACE_ON_FAILURE
                 Capabilities: CAPABILITY_AUTO_EXPAND
-                ChangeSetType: UPDATE
                 RoleArn: !GetAtt CloudFormationServiceRole.Arn
                 TemplatePath: "Template::activeSg_sam_output.yaml"
 
@@ -167,7 +166,7 @@ Resources:
               Service: "cloudformation.amazonaws.com"
             Action: "sts:AssumeRole"
       Policies:
-        - PolicyName: "iam-and-cfn"
+        - PolicyName: "iam"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -178,7 +177,23 @@ Resources:
                   - "iam:AttachRolePolicy"
                   - "iam:CreateRole"
                   - "iam:PutRolePolicy"
-                  - "cloudformation:*"
+                Resource: "*"
+        - PolicyName: "cfn"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "cloudformation:CreateStack"
+                  - "cloudformation:DeleteStack"
+                  - "cloudformation:DescribeStacks"
+                  - "cloudformation:UpdateStack"
+                  - "cloudformation:CreateChangeSet"
+                  - "cloudformation:DeleteChangeSet"
+                  - "cloudformation:DescribeChangeSet"
+                  - "cloudformation:ExecuteChangeSet"
+                  - "cloudformation:SetStackPolicy"
+                  - "cloudformation:ValidateTemplate"
                 Resource: "*"
 
   CodePipelineServiceRole:
