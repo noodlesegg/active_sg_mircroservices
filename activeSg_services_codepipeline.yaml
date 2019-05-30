@@ -119,7 +119,8 @@ Resources:
               Configuration:
                 StackName: !Sub "active-sg-micro-services-deployment-${AWS::Region}"
                 ActionMode: REPLACE_ON_FAILURE
-                Capabilities: CAPABILITY_AUTO_EXPAND
+                # Capabilities: CAPABILITY_AUTO_EXPAND
+                Capabilities: CAPABILITY_IAM
                 RoleArn: !GetAtt CloudFormationServiceRole.Arn
                 TemplatePath: "Template::activeSg_sam_output.yaml"
 
