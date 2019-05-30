@@ -39,8 +39,12 @@ Resources:
     Type: "AWS::CodeBuild::Project"
     Properties:
       Artifacts:
-        Type: "S3"
-        Location: !Ref S3ArtifactStoreBucket
+        Type: CODEPIPELINE
+        # Location: !Ref S3ArtifactStoreBucket
+        # Name: "/"
+        # Path: "artifacts"
+        # NamespaceType: BUILD_ID
+        # Packaging: NONE
       Description: "Code Build for ActiveSG Micro services"
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
@@ -101,7 +105,7 @@ Resources:
                 Version: 1
                 Provider: "GitHub"
               OutputArtifacts:
-                - Name: "ActiveSG"
+                - Name: "ActiveSGSource"
               Configuration:
                 Owner: !Ref GitHubUserName
                 Repo: !Ref GitHubRepository
@@ -117,14 +121,16 @@ Resources:
                 Version: 1
                 Provider: "CodeBuild"
               InputArtifacts:
-                - Name: "ActiveSG"
+                - Name: "ActiveSGSource"
+              OutputArtifacts:
+                - Name: "ActiveSGBuild"
               Configuration:
                 ProjectName: !Ref CodeBuildLambda
         - Name: "Deploy"
           Actions:
             - Name: "Deploy-Action"
               InputArtifacts:
-                - Name: "ActiveSG"
+                - Name: "ActiveSGBuild"
               ActionTypeId:
                 Category: "Deploy"
                 Owner: "AWS"
@@ -135,7 +141,7 @@ Resources:
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_IAM
                 RoleArn: !GetAtt CodeDeployServiceRole.Arn
-                TemplatePath: "ActiveSG::activeSg_sam_output.yaml"
+                TemplatePath: "ActiveSGBuild::activeSg_sam_output.yaml"
 
   CodeBuildServiceRole:
     Type: "AWS::IAM::Role"
