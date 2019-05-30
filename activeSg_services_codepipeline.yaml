@@ -163,7 +163,7 @@ Resources:
         Statement:
           - Effect: "Allow"
             Principal:
-              Service: "codedeploy.amazonaws.com"
+              Service: "ec2.amazonaws.com"
             Action: "sts:AssumeRole"
 
   CodePipelineServiceRole:
