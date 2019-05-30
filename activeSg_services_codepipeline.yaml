@@ -119,7 +119,7 @@ Resources:
               Configuration:
                 StackName: "active-sg-micro-services-deployment"
                 ActionMode: CREATE_UPDATE
-                Capabilities: CAPABILITY_IAM
+                Capabilities: CAPABILITY_IAM, CAPABILITY_AUTO_EXPAND 
                 RoleArn: !GetAtt CloudFormationServiceRole.Arn
                 TemplatePath: "Template::activeSg_sam_output.yaml"
 
