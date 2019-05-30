@@ -30,21 +30,16 @@ Resources:
     Properties:
       BucketName: !Sub "${S3ArtifactStoreBucketName}-${AWS::Region}"
       AccessControl: "Private"
-      #BucketEncryption:
-      #  ServerSideEncryptionConfiguration:
-      #    - ServerSideEncryptionByDefault:
-      #        SSEAlgorithm: "AES256"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: "AES256"
 
   CodeBuildLambda:
     Type: "AWS::CodeBuild::Project"
     Properties:
       Artifacts:
         Type: CODEPIPELINE
-        # Location: !Ref S3ArtifactStoreBucket
-        # Name: "/"
-        # Path: "artifacts"
-        # NamespaceType: BUILD_ID
-        # Packaging: NONE
       Description: "Code Build for ActiveSG Micro services"
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
@@ -57,21 +52,6 @@ Resources:
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
       Source:
         Type: CODEPIPELINE
-
-  #CodeDeployServerless:
-  #  Type: "AWS::CodeDeploy::Application"
-  #  Properties:
-  #    ComputePlatform: Lambda
-
-  #CodeDeployDeploymentGroup:
-  #  Type: "AWS::CodeDeploy::DeploymentGroup"
-  #  Properties:
-  #    ApplicationName: !Ref CodeDeployServerless
-  #    DeploymentConfigName: CodeDeployDefault.LambdaCanary10Percent5Minutes
-  #    DeploymentStyle:
-  #      DeploymentOption: WITH_TRAFFIC_CONTROL
-  #      DeploymentType: BLUE_GREEN
-  #    ServiceRoleArn: !GetAtt CodeDeployServiceRole.Arn
 
   WebHook:
     Type: "AWS::CodePipeline::Webhook"
@@ -105,7 +85,7 @@ Resources:
                 Version: 1
                 Provider: "GitHub"
               OutputArtifacts:
-                - Name: "ActiveSGSource"
+                - Name: "SourceCode"
               Configuration:
                 Owner: !Ref GitHubUserName
                 Repo: !Ref GitHubRepository
@@ -121,16 +101,16 @@ Resources:
                 Version: 1
                 Provider: "CodeBuild"
               InputArtifacts:
-                - Name: "ActiveSGSource"
+                - Name: "SourceCode"
               OutputArtifacts:
-                - Name: "ActiveSGBuild"
+                - Name: "Template"
               Configuration:
                 ProjectName: !Ref CodeBuildLambda
         - Name: "Deploy"
           Actions:
             - Name: "Deploy-Action"
               InputArtifacts:
-                - Name: "ActiveSGBuild"
+                - Name: "Template"
               ActionTypeId:
                 Category: "Deploy"
                 Owner: "AWS"
@@ -141,7 +121,7 @@ Resources:
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_IAM
                 RoleArn: !GetAtt CodeDeployServiceRole.Arn
-                TemplatePath: "ActiveSGBuild::activeSg_sam_output.yaml"
+                TemplatePath: "Template::activeSg_sam_output.yaml"
 
   CodeBuildServiceRole:
     Type: "AWS::IAM::Role"
@@ -210,6 +190,15 @@ Resources:
               - Effect: "Allow"
                 Action: "cloudformation:*"
                 Resource: "*"
+        - PolicyName: "iam"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: 
+                  - "iam:PassRole"
+                  - "iam:GetRole"
+                Resource: "*"
 
   CodePipelineServiceRole:
     Type: "AWS::IAM::Role"
@@ -235,14 +224,5 @@ Resources:
             Statement:
               - Effect: "Allow"
                 Action: "codebuild:*"
-                Resource: "*"
-        - PolicyName: "s3"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action: 
-                  - "s3:GetObject"
-                  - "s3:PutObject"
                 Resource: "*"
 
