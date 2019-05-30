@@ -120,7 +120,7 @@ Resources:
                 StackName: "active-sg-micro-services-deployment"
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_IAM
-                RoleArn: !GetAtt CodePipelineServiceRole.Arn
+                RoleArn: !GetAtt CodeDeployServiceRole.Arn
                 TemplatePath: "Template::activeSg_sam_output.yaml"
 
   CodeBuildServiceRole:
@@ -202,36 +202,34 @@ Resources:
               Service: codepipeline.amazonaws.com
             Action: "sts:AssumeRole"
       Policies:
-        - PolicyName: "cloudformation"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action: "cloudformation:*"
-                Resource: "*"
-        - PolicyName: "codeBuild"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action: "codebuild:*"
-                Resource: "*"
-        - PolicyName: "s3"
+        - PolicyName: "fullAccess"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: "Allow"
                 Action:
-                  - "s3:GetObject"
-                  - "s3:GetObjectVersion"
-                  - "s3:PutObject"
-                Resource: "*"
-        - PolicyName: "iam"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action: 
+                  - "codepipeline:*"
+                  - "iam:ListRoles"
                   - "iam:PassRole"
-                  - "iam:GetRole"
+                  - "s3:CreateBucket"
+                  - "s3:GetBucketPolicy"
+                  - "s3:GetObject"
+                  - "s3:ListAllMyBuckets"
+                  - "s3:ListBucket"
+                  - "s3:PutBucketPolicy"
+                  - "codecommit:ListBranches"
+                  - "codecommit:ListRepositories"
+                  - "codedeploy:GetApplication"
+                  - "codedeploy:GetDeploymentGroup"
+                  - "codedeploy:ListApplications"
+                  - "codedeploy:ListDeploymentGroups"
+                  - "elasticbeanstalk:DescribeApplications"
+                  - "elasticbeanstalk:DescribeEnvironments"
+                  - "lambda:GetFunctionConfiguration"
+                  - "lambda:ListFunctions"
+                  - "opsworks:DescribeApps"
+                  - "opsworks:DescribeLayers"
+                  - "opsworks:DescribeStacks"
+                  - "cloudformation:DescribeStacks"
+                  - "cloudformation:ListChangeSets"
                 Resource: "*"
