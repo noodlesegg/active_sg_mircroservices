@@ -165,31 +165,6 @@ Resources:
             Principal:
               Service: "codedeploy.amazonaws.com"
             Action: "sts:AssumeRole"
-      Policies:
-        - PolicyName: "cloudwatch"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action: 
-                  - "logs:CreateLogGroup"
-                  - "logs:CreateLogStream"
-                  - "logs:PutLogEvents"
-                Resource: "*"
-        - PolicyName: "code-deploy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action: "codedeploy:*"
-                Resource: "*"
-        - PolicyName: "cloudformation"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action: "cloudformation:*"
-                Resource: "*"
 
   CodePipelineServiceRole:
     Type: "AWS::IAM::Role"
