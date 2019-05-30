@@ -165,6 +165,47 @@ Resources:
             Principal:
               Service: "ec2.amazonaws.com"
             Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "cloudformation"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "cloudformation:*"
+                Resource: "*"
+        - PolicyName: "codeBuild"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "codebuild:*"
+                Resource: "*"
+        - PolicyName: "code-deploy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "codedeploy:*"
+                Resource: "*"
+        - PolicyName: "s3"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "s3:GetObject"
+                  - "s3:GetObjectVersion"
+                  - "s3:PutObject"
+                Resource: "*"
+        - PolicyName: "iam"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: 
+                  - "iam:PassRole"
+                  - "iam:GetRole"
+                Resource: "*"
 
   CodePipelineServiceRole:
     Type: "AWS::IAM::Role"
