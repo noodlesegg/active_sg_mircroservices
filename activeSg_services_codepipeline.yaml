@@ -120,6 +120,7 @@ Resources:
                 StackName: "active-sg-micro-services-deployment"
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_AUTO_EXPAND
+                ChangeSetType: UPDATE
                 RoleArn: !GetAtt CloudFormationServiceRole.Arn
                 TemplatePath: "Template::activeSg_sam_output.yaml"
 
@@ -166,7 +167,7 @@ Resources:
               Service: "cloudformation.amazonaws.com"
             Action: "sts:AssumeRole"
       Policies:
-        - PolicyName: "iam"
+        - PolicyName: "iam-and-cfn"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -177,6 +178,7 @@ Resources:
                   - "iam:AttachRolePolicy"
                   - "iam:CreateRole"
                   - "iam:PutRolePolicy"
+                  - "cloudformation:*"
                 Resource: "*"
 
   CodePipelineServiceRole:
@@ -190,13 +192,6 @@ Resources:
               Service: codepipeline.amazonaws.com
             Action: "sts:AssumeRole"
       Policies:
-        - PolicyName: "cloudformation"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action: "cloudformation:*"
-                Resource: "*"
         - PolicyName: "codeBuild"
           PolicyDocument:
             Version: "2012-10-17"
@@ -220,13 +215,4 @@ Resources:
                   - "s3:GetObject"
                   - "s3:GetObjectVersion"
                   - "s3:PutObject"
-                Resource: "*"
-        - PolicyName: "iam"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action: 
-                  - "iam:PassRole"
-                  - "iam:GetRole"
                 Resource: "*"
