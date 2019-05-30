@@ -10,7 +10,7 @@ phases:
       - cd ../pdf_generator && npm install
       - cd ../pdf_notification && npm install
       - cd ../
-      - aws cloudformation package --template-file activeSg_sam.yaml --s3-bucket ${ARTIFACT_BUCKET} --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --output-template-file activeSg_sam_output.yaml --debug
+      - aws cloudformation package --template-file activeSg_sam.yaml --s3-bucket ${ARTIFACT_BUCKET} --output-template-file activeSg_sam_output.yaml --debug
 artifacts:
   type: zip
   files:
