@@ -5,14 +5,17 @@ Parameters:
   S3PDFBucketName:
     Type: String
     Description: "S3 Bucket name for the generated PDF."
+    Default: "pdf-bucket"
 
   AndroidSNSArn:
     Type: String
-    Description: "SNS Amazon Resource Name for android application"
+    Description: "SNS Amazon Resource Name for android application" 
+    Default: "arn:aws:sns:ap-southeast-1:945711983741:app/GCM/ActiveSG-Android" 
 
   iOSSNSArn:
     Type: String
     Description: "SNS Amazon Resource Name for iOS application"
+    Default: "arn:aws:sns:ap-southeast-1:945711983741:app/APNS/ActiveSG-iOS"
 
 Resources:
   S3PDF:
