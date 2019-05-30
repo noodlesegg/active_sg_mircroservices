@@ -120,7 +120,7 @@ Resources:
                 StackName: "active-sg-micro-services-deployment"
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_IAM
-                RoleArn: !GetAtt CodeDeployServiceRole.Arn
+                RoleArn: !GetAtt CodePipelineServiceRole.Arn
                 TemplatePath: "Template::activeSg_sam_output.yaml"
 
   CodeBuildServiceRole:
