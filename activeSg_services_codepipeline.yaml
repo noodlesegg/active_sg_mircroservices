@@ -137,7 +137,7 @@ Resources:
                 - "cloudformation.amazonaws.com"
             Action: "sts:AssumeRole"
       Policies:
-        - PolicyName: "cloudwatch"
+        - PolicyName: "codestar-policies"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -147,36 +147,14 @@ Resources:
                   - "logs:CreateLogStream"
                   - "logs:PutLogEvents"
                 Resource: "*"
-        - PolicyName: "codeBuild"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action: "codebuild:*"
-                Resource: "*"
-        - PolicyName: "code-deploy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action: "codedeploy:*"
-                Resource: "*"
-        - PolicyName: "s3"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
               - Effect: "Allow"
                 Action:
-                  - "s3:GetObject"
-                  - "s3:GetObjectVersion"
-                  - "s3:PutObject"
+                  - "codebuild:*"
+                  - "codedeploy:*"
+                  - "cloudformation:*"
                 Resource: "*"
-        - PolicyName: "iam"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
               - Effect: "Allow"
-                Action: 
+                Action:
                   - "iam:PassRole"
                   - "iam:GetRole"
                   - "iam:AttachRolePolicy"
@@ -185,10 +163,15 @@ Resources:
                   - "iam:DeleteRolePolicy"
                   - "iam:DeleteRole"
                 Resource: "*"
-        - PolicyName: "cfn"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
               - Effect: "Allow"
-                Action: "cloudformation:*"
+                Action:
+                  - "s3:CreateBucket"
+                  - "s3:GetObject"
+                  - "s3:GetObjectVersion"
+                  - "s3:PutObject"
+                Resource: "*"
+              - Effect: "Allow"
+                Action:
+                  - "sqs:CreateQueue"
+                  - "lambda:CreateFunction"
                 Resource: "*"
