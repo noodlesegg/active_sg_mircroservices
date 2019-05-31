@@ -118,7 +118,7 @@ Resources:
                 Provider: "CloudFormation"
               Configuration:
                 StackName: !Sub "active-sg-micro-services-deployment-${AWS::Region}"
-                ActionMode: CREATE_UPDATE
+                ActionMode: REPLACE_ON_FAILURE
                 Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND
                 RoleArn: !GetAtt CodeStarServiceRole.Arn
                 TemplatePath: "Template::activeSg_sam_output.yaml"
@@ -183,6 +183,7 @@ Resources:
                   - "iam:CreateRole"
                   - "iam:PutRolePolicy"
                   - "iam:DeleteRolePolicy"
+                  - "iam:DeleteRole"
                 Resource: "*"
         - PolicyName: "cfn"
           PolicyDocument:

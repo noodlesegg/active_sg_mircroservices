@@ -129,6 +129,7 @@ Resources:
               - Effect: "Allow"
                 Action: 
                   - "lambda:InvokeFunction"
+                  - "s3:CreateBucket"
                   - "s3:GetObject"
                   - "s3:PutObject"
                   - "ses:SendEmail"
@@ -140,6 +141,8 @@ Resources:
             Statement:
               - Effect: "Allow"
                 Action:
+                  - "sqs:CreateQueue"
+                  - "sqs:CreateQueue"
                   - "sqs:SendMessage"
                   - "sqs:ReceiveMessage"
                   - "sqs:DeleteMessage"
