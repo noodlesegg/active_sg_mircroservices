@@ -143,18 +143,10 @@ Resources:
             Statement:
               - Effect: "Allow"
                 Action: 
-                  - "logs:CreateLogGroup"
-                  - "logs:CreateLogStream"
-                  - "logs:PutLogEvents"
-                Resource: "*"
-              - Effect: "Allow"
-                Action:
+                  - "logs:*"
                   - "codebuild:*"
                   - "codedeploy:*"
                   - "cloudformation:*"
-                Resource: "*"
-              - Effect: "Allow"
-                Action:
                   - "iam:PassRole"
                   - "iam:GetRole"
                   - "iam:AttachRolePolicy"
@@ -162,16 +154,7 @@ Resources:
                   - "iam:PutRolePolicy"
                   - "iam:DeleteRolePolicy"
                   - "iam:DeleteRole"
-                Resource: "*"
-              - Effect: "Allow"
-                Action:
-                  - "s3:CreateBucket"
-                  - "s3:GetObject"
-                  - "s3:GetObjectVersion"
-                  - "s3:PutObject"
-                Resource: "*"
-              - Effect: "Allow"
-                Action:
-                  - "sqs:CreateQueue"
-                  - "lambda:CreateFunction"
+                  - "s3:*"
+                  - "sqs:*"
+                  - "lambda:*"
                 Resource: "*"
