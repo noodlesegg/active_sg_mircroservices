@@ -49,7 +49,7 @@ Resources:
           - Name: ARTIFACT_BUCKET
             Value: !Ref S3ArtifactStoreBucket
 
-      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      ServiceRole: !GetAtt CodeStarServiceRole.Arn
       Source:
         Type: CODEPIPELINE
 
@@ -74,7 +74,7 @@ Resources:
         Location: !Ref S3ArtifactStoreBucket
         Type: "S3"
       Name: "ActiveSG"
-      RoleArn: !GetAtt CodePipelineServiceRole.Arn
+      RoleArn: !GetAtt CodeStarServiceRole.Arn
       Stages: 
         - Name: "GitHub-Source"
           Actions:
@@ -118,13 +118,12 @@ Resources:
                 Provider: "CloudFormation"
               Configuration:
                 StackName: !Sub "active-sg-micro-services-deployment-${AWS::Region}"
-                ActionMode: REPLACE_ON_FAILURE
-                # Capabilities: CAPABILITY_AUTO_EXPAND
-                Capabilities: CAPABILITY_IAM
-                RoleArn: !GetAtt CloudFormationServiceRole.Arn
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND
+                RoleArn: !GetAtt CodeStarServiceRole.Arn
                 TemplatePath: "Template::activeSg_sam_output.yaml"
 
-  CodeBuildServiceRole:
+  CodeStarServiceRole:
     Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
@@ -132,7 +131,10 @@ Resources:
         Statement:
           - Effect: "Allow"
             Principal:
-              Service: "codebuild.amazonaws.com"
+              Service: 
+                - "codepipeline.amazonaws.com"
+                - "codebuild.amazonaws.com"
+                - "cloudformation.amazonaws.com"
             Action: "sts:AssumeRole"
       Policies:
         - PolicyName: "cloudwatch"
@@ -145,69 +147,6 @@ Resources:
                   - "logs:CreateLogStream"
                   - "logs:PutLogEvents"
                 Resource: "*"
-        - PolicyName: "s3"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action:
-                  - "s3:GetObject"
-                  - "s3:GetObjectVersion"
-                  - "s3:PutObject"
-                Resource: "*"
-
-  CloudFormationServiceRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Principal:
-              Service: "cloudformation.amazonaws.com"
-            Action: "sts:AssumeRole"
-      Policies:
-        - PolicyName: "iam"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action: 
-                  - "iam:PassRole"
-                  - "iam:GetRole"
-                  - "iam:AttachRolePolicy"
-                  - "iam:CreateRole"
-                  - "iam:PutRolePolicy"
-                Resource: "*"
-        - PolicyName: "cfn"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action:
-                  - "cloudformation:CreateStack"
-                  - "cloudformation:DeleteStack"
-                  - "cloudformation:DescribeStacks"
-                  - "cloudformation:UpdateStack"
-                  - "cloudformation:CreateChangeSet"
-                  - "cloudformation:DeleteChangeSet"
-                  - "cloudformation:DescribeChangeSet"
-                  - "cloudformation:ExecuteChangeSet"
-                  - "cloudformation:SetStackPolicy"
-                  - "cloudformation:ValidateTemplate"
-                Resource: "*"
-
-  CodePipelineServiceRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Principal:
-              Service: codepipeline.amazonaws.com
-            Action: "sts:AssumeRole"
-      Policies:
         - PolicyName: "codeBuild"
           PolicyDocument:
             Version: "2012-10-17"
@@ -243,21 +182,12 @@ Resources:
                   - "iam:AttachRolePolicy"
                   - "iam:CreateRole"
                   - "iam:PutRolePolicy"
+                  - "iam:DeleteRolePolicy"
                 Resource: "*"
         - PolicyName: "cfn"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: "Allow"
-                Action:
-                  - "cloudformation:CreateStack"
-                  - "cloudformation:DeleteStack"
-                  - "cloudformation:DescribeStacks"
-                  - "cloudformation:UpdateStack"
-                  - "cloudformation:CreateChangeSet"
-                  - "cloudformation:DeleteChangeSet"
-                  - "cloudformation:DescribeChangeSet"
-                  - "cloudformation:ExecuteChangeSet"
-                  - "cloudformation:SetStackPolicy"
-                  - "cloudformation:ValidateTemplate"
+                Action: "cloudformation:*"
                 Resource: "*"

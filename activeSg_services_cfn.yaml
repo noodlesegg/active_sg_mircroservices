@@ -14,6 +14,11 @@ Parameters:
     Type: String
     Description: "SNS Amazon Resource Name for iOS application"
 
+  MessageBirdAccessKey:
+    Type: String
+    NoEcho: true
+    Description: "Message Bird access key. This is for SMS notification"
+
 Resources:
   S3PDF:
     Type: "AWS::S3::Bucket"
@@ -129,7 +134,7 @@ Resources:
         Variables:
           successfulQueueUrl: !Ref SQSSuccessfulQueue
           toProcessQueueUrl: !Ref SQSToBeProcessQueue
-          messageBirdAccessKey: "mkrBX17v7FQtuv0BiQHK5q7Du"
+          messageBirdAccessKey: !Ref MessageBirdAccessKey
           GCM: !Sub "${AndroidSNSArn}"
           APNS: !Sub "${iOSSNSArn}" 
 
