@@ -209,5 +209,5 @@ Resources:
                   - "s3:*"
                   - "sqs:*"
                   - "lambda:*"
-                  - "ssm:GetParameters"
+                  - "ssm:*"
                 Resource: "*"
