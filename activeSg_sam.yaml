@@ -1,21 +1,27 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Transform: 'AWS::Serverless-2016-10-31'
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: "AWS::Serverless-2016-10-31"
 
 Parameters:
   S3PDFBucketName:
-    Type: String
+    Type: "AWS::SSM::Parameter::Value<String>"
     Description: "S3 Bucket name for the generated PDF."
-    Default: "pdf-bucket"
+    Default: S3PDFBucketName
 
   AndroidSNSArn:
-    Type: String
-    Description: "SNS Amazon Resource Name for android application" 
-    Default: "arn:aws:sns:ap-southeast-1:945711983741:app/GCM/ActiveSG-Android" 
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Description: "SNS Amazon Resource Name for android application"
+    Default: AndroidSNSArn
 
   iOSSNSArn:
-    Type: String
+    Type: "AWS::SSM::Parameter::Value<String>"
     Description: "SNS Amazon Resource Name for iOS application"
-    Default: "arn:aws:sns:ap-southeast-1:945711983741:app/APNS/ActiveSG-iOS"
+    Default: iOSSNSArn
+
+  MessageBirdAccessKey:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Description: "Message Bird Access Key"
+    Default: MessageBirdAccessKey
+    NoEcho: true
 
 Resources:
   S3PDF:
@@ -40,7 +46,7 @@ Resources:
       Timeout: 60
       Environment:
         Variables:
-          pdfBucket: !Sub "${S3PDFBucketName}-${AWS::Region}"
+          pdfBucket: !Ref S3PDF
           sendMailFunction: !Sub "${LambdaPDFNotificationEmail}"
           region: !Sub "${AWS::Region}"
 
@@ -55,7 +61,7 @@ Resources:
       Runtime: nodejs8.10
       Environment:
         Variables:
-          pdfBucket: !Sub "${S3PDFBucketName}-${AWS::Region}"
+          pdfBucket: !Ref S3PDF
 
   LambdaActiveSGNotification:
     Type: "AWS::Serverless::Function"
@@ -71,9 +77,9 @@ Resources:
         Variables:
           successfulQueueUrl: !Ref SQSSuccessfulQueue
           toProcessQueueUrl: !Ref SQSToBeProcessQueue
-          messageBirdAccessKey: "mkrBX17v7FQtuv0BiQHK5q7Du"
-          GCM: !Sub "${AndroidSNSArn}"
-          APNS: !Sub "${iOSSNSArn}" 
+          messageBirdAccessKey: !Ref MessageBirdAccessKey
+          GCM: !Ref AndroidSNSArn
+          APNS: !Ref iOSSNSArn
 
   SQSToBeProcessQueue:
     Type: "AWS::SQS::Queue"

@@ -2,6 +2,8 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: "ActiveSG Micro Services Code Pipeline"
 
 Parameters:
+
+  ### Codepipeline Parameters ###
   GitHubUserName:
     Type: String
     Description: "GitHub username for the repository"
@@ -24,6 +26,26 @@ Parameters:
     Type: String
     Description: "S3 bucket for the artifact store"
 
+  ### ActiveSG Parameters ###
+  S3PDFBucketName:
+    Type: String
+    Description: "S3 Bucket name for the generated PDF."
+
+  AndroidSNSArn:
+    Type: String
+    Description: "SNS Amazon Resource Name for android application" 
+    # Default: "arn:aws:sns:ap-southeast-1:945711983741:app/GCM/ActiveSG-Android" 
+
+  iOSSNSArn:
+    Type: String
+    Description: "SNS Amazon Resource Name for iOS application"
+    # Default: "arn:aws:sns:ap-southeast-1:945711983741:app/APNS/ActiveSG-iOS"
+
+  MessageBirdAccessKey:
+    Type: String
+    Description: "Message Bird Access Key"
+    NoEcho: true
+
 Resources:
   S3ArtifactStoreBucket:
     Type: "AWS::S3::Bucket"
@@ -34,6 +56,38 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: "AES256"
+
+  S3PDFBucketNameParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Description: "S3 Bucket name for the generated PDF."
+      Name: "S3PDFBucketName"
+      Type: String
+      Value: !Ref S3PDFBucketName
+
+  AndroidSNSArnParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Description: "SNS Amazon Resource Name for android application"
+      Name: "AndroidSNSArn"
+      Type: String
+      Value: !Ref AndroidSNSArn
+
+  iOSSNSArnParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Description: "SNS Amazon Resource Name for iOS application"
+      Name: "iOSSNSArn"
+      Type: String
+      Value: !Ref iOSSNSArn
+
+  MessageBirdAccessKeyParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Description: "Message Bird Access Key"
+      Name: "MessageBirdAccessKey"
+      Type: String
+      Value: !Ref MessageBirdAccessKey
 
   CodeBuildLambda:
     Type: "AWS::CodeBuild::Project"
