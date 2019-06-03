@@ -33,13 +33,11 @@ Parameters:
 
   AndroidSNSArn:
     Type: String
-    Description: "SNS Amazon Resource Name for android application" 
-    # Default: "arn:aws:sns:ap-southeast-1:945711983741:app/GCM/ActiveSG-Android" 
+    Description: "SNS Amazon Resource Name for android application"
 
   iOSSNSArn:
     Type: String
     Description: "SNS Amazon Resource Name for iOS application"
-    # Default: "arn:aws:sns:ap-southeast-1:945711983741:app/APNS/ActiveSG-iOS"
 
   MessageBirdAccessKey:
     Type: String
@@ -211,4 +209,5 @@ Resources:
                   - "s3:*"
                   - "sqs:*"
                   - "lambda:*"
+                  - "ssm:GetParameters"
                 Resource: "*"
