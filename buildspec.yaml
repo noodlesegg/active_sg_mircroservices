@@ -15,5 +15,4 @@ phases:
 artifacts:
   type: zip
   files:
-    - activeSg_sam.yaml
     - activeSg_sam_output.yaml
